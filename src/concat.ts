@@ -67,7 +67,6 @@ async function shouldBeNormalized(file: string): Promise<boolean> {
 	const audioSampleRate = await getAudioSampleRate(file);
 	if (audioSampleRate != CORRECT_SAMPLE_RATE) return true;
 
-	// TODO: consider the possibility of clips being at 30fps, witch does not need to be converted
 	const framesPerSecond = await getVideoFramesPerSecond(file);
 	if (Math.abs(framesPerSecond - 60) >= 0.06) return true;
 
