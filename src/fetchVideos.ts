@@ -30,7 +30,7 @@ export async function fetchVideos(gameId: string, limit: number, startDate: stri
 
 	console.log(p.length);
 
-	Promise.all(p);
+	await Promise.all(p);
 }
 
 async function fetchClip(clip: HelixClip, fileName: string) {

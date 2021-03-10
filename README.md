@@ -8,6 +8,6 @@ pegando os clips mais assistidos do dia para um certo jogo e criando um video us
 -   Clone o repositorio localmente
 -   Rode `yarn i` para baixar as dependencias do projeto
 -   Crie um arquivo `.env` com o formato descrito em [.env.example](.env.example)
--   Analise os scripts no [package.json](package.json) para descobrir o que cada um faz
+-   Rode `yarn start` para baixar e concatenar os clips
 
 Como o projeto ainda esta em faze de prototipo, alteracoes drasticas sao feitas regurlamentes

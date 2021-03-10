@@ -1,22 +1,20 @@
 import { exec } from 'child_process';
 
 import { normalize } from './normalize';
+import { verify } from './verify';
 
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 
-import util from 'util';
-const awaitExec = util.promisify(exec);
-
 import { promises } from 'fs';
-import { verify } from './verify';
 const fs = promises;
 
 let videosFolder = '\\videos\\';
 
-(async () => {
+export async function concat() {
 	let names = await fs.readdir(__dirname + videosFolder);
+	names = names.filter(s => s.endsWith(`.mp4`));
 	// TODO: change this behabiour, if clipID contains out naturaly, it will be ignored
-	names = names.filter(s => !s.match(/out/) && s.endsWith(`.mp4`));
+	names = names.filter(s => !s.match(/out/));
 	// Ordena os videos pelo nome do arquivo como numero
 	names.sort((a, b) => parseInt(a) - parseInt(b));
 	let files = names.map(s => `${__dirname}${videosFolder}${s}`);
@@ -54,4 +52,4 @@ let videosFolder = '\\videos\\';
 
 		console.log(`process complete: ${outFile}`);
 	});
-})();
+}
