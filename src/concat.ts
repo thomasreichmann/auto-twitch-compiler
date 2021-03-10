@@ -10,7 +10,10 @@ const fs = promises;
 
 let videosFolder = '\\videos\\';
 
-export async function concat() {
+/**
+ * Concatena todos os videos no diretorio /videos/
+ */
+export async function concat(): Promise<void> {
 	let names = await fs.readdir(__dirname + videosFolder);
 	names = names.filter(s => s.endsWith(`.mp4`));
 	// TODO: change this behabiour, if clipID contains out naturaly, it will be ignored
@@ -44,11 +47,18 @@ export async function concat() {
 
 	const cmd = '"' + ffmpegPath + '" -y' + ' -f concat' + ' -safe 0' + ' -i "' + filesPath + '"' + filer + ' -c copy "' + outFile + '"';
 
-	exec(cmd, { maxBuffer: 1024 * 5000 }, (err, stdout, stderr) => {
+	exec(cmd, { maxBuffer: 1024 * 5000 }, async (err, stdout, stderr) => {
 		if (err) {
 			console.error(`exec error: ${err}`);
 			return;
 		}
+
+		// Deletamos todos os arquivos individuais
+		await fs.unlink(filesPath);
+
+		let p: Promise<void>[] = [];
+		for (let file of files) p.push(fs.unlink(file));
+		await Promise.all(p);
 
 		console.log(`process complete: ${outFile}`);
 	});
