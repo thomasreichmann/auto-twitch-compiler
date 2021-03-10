@@ -15,9 +15,10 @@ let videosFolder = '\\videos\\';
 
 (async () => {
 	let names = await fs.readdir(__dirname + videosFolder);
-	names = names.filter(s => s.endsWith(`.mp4`));
 	// TODO: change this behabiour, if clipID contains out naturaly, it will be ignored
-	names = names.filter(s => !s.match(/out/));
+	names = names.filter(s => !s.match(/out/) && s.endsWith(`.mp4`));
+	// Ordena os videos pelo nome do arquivo como numero
+	names.sort((a, b) => parseInt(a) - parseInt(b));
 	let files = names.map(s => `${__dirname}${videosFolder}${s}`);
 
 	// Usamos o normalize.ts para normalizar todos os videos para a mesma bitrate (ajuda a minimizar chances de erro com o concat)
