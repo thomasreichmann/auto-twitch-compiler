@@ -4,6 +4,11 @@ import { promises } from 'fs';
 const fs = promises;
 const exec = util.promisify(child.exec);
 
+/**
+ * Padroniza um arquivo de video utilizando ffmpeg,
+ * atualmente padroniza: bitrate(a), sampleRate(a) e frameRate
+ * @param file caminho absoluto do arquivo
+ */
 export async function normalize(file: string) {
 	let newFile = appendToFilename(file, '_fixed');
 	const cmd = `ffmpeg -y -i ${file} -b:a 127K -ar 48000 -r 60 -preset ultrafast ${newFile}`;
