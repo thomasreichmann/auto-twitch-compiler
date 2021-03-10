@@ -8,19 +8,18 @@ const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 import { promises } from 'fs';
 const fs = promises;
 
-let videosFolder = '\\videos\\';
-
 /**
  * Concatena todos os videos no diretorio /videos/
+ * @param videosDir caminho absoluto para o diretorio para armazenar videos
  */
-export async function concat(): Promise<void> {
-	let names = await fs.readdir(__dirname + videosFolder);
+export async function concat(videosDir: string): Promise<void> {
+	let names = await fs.readdir(videosDir);
 	names = names.filter(s => s.endsWith(`.mp4`));
 	// TODO: change this behabiour, if clipID contains out naturaly, it will be ignored
 	names = names.filter(s => !s.match(/out/));
 	// Ordena os videos pelo nome do arquivo como numero
 	names.sort((a, b) => parseInt(a) - parseInt(b));
-	let files = names.map(s => `${__dirname}${videosFolder}${s}`);
+	let files = names.map(s => `${videosDir}${s}`);
 
 	// Usamos o normalize.ts para normalizar todos os videos para a mesma bitrate (ajuda a minimizar chances de erro com o concat)
 	let p = [];
@@ -38,10 +37,10 @@ export async function concat(): Promise<void> {
 	// Criamos o arquivo files.txt para o ffmpeg usar como referencia
 	let s = '';
 	for (const file of files) s += `file '${file}'\n`;
-	let filesPath = __dirname + videosFolder + 'files.txt';
+	let filesPath = videosDir + 'files.txt';
 	await fs.writeFile(filesPath, s);
 
-	let outFile = __dirname + videosFolder + 'out.mp4';
+	let outFile = videosDir + 'out.mp4';
 
 	let filer = ' -b:a 128K';
 
