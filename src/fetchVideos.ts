@@ -20,7 +20,7 @@ const MAX_VIDEOS = 500;
  * @param limit limite de clipes para serem procurados
  * @param startDate data mais antiga para buscar clips em formato ISO
  */
-export async function fetchVideos(videosDir: string, gameId: string, languageLimits: LanguageLimit[], startDate: string) {
+export async function fetchVideos(videosDir: string, gameId: string, languageLimits: LanguageLimit[], startDate: string, blackListedChannels: string[]) {
 	let result = apiClient.helix.clips.getClipsForGamePaginated(gameId, {
 		startDate,
 	});
@@ -35,6 +35,9 @@ export async function fetchVideos(videosDir: string, gameId: string, languageLim
 		// TODO: add a progress bar by videos fetched?
 
 		for (const lang of languageLimits) {
+			// Caso o canal do clip esteja na blacklist, pulamos o clip
+			if (blackListedChannels.find(c => c === clip.broadcasterDisplayName)) break;
+
 			// Checamos o clipe contra todas as languages que foram requesitadas
 			// Caso ele seja uma delas, fazemos o download e saimos desse loop
 			if (clip.language.match(lang.code) && lang.count! < lang.limit) {
@@ -54,13 +57,11 @@ export async function fetchVideos(videosDir: string, gameId: string, languageLim
 		i++;
 	}
 
-	// Debug checks
-	for (const lang of languageLimits) console.log(lang.count);
-
 	await Promise.all(p);
 }
 
 async function fetchClip(videosDir: string, clip: HelixClip, fileName: string) {
+	// DEBUG
 	console.log(clip.creationDate, clip.language, clip.views, clip.title, clip.broadcasterDisplayName, clip.url);
 
 	let url = clip.thumbnailUrl.split('-preview-')[0] + '.mp4';
