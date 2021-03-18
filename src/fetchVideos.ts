@@ -8,6 +8,9 @@ const clientSecret = process.env.CLIENT_SECRET!;
 const authProvider = new ClientCredentialsAuthProvider(clientId, clientSecret);
 const apiClient = new ApiClient({ authProvider });
 
+// Consts
+const MAX_VIDEOS = 100;
+
 /**
  * Faz o download dos clips mais vistos da twitch de uma categoria
  * @param videosDir caminho absoluto para o diretorio para armazenar videos
@@ -16,20 +19,23 @@ const apiClient = new ApiClient({ authProvider });
  * @param startDate data mais antiga para buscar clips em formato ISO
  */
 export async function fetchVideos(videosDir: string, gameId: string, limit: number, startDate: string) {
-	let clips = await apiClient.helix.clips.getClipsForGame(gameId, {
-		limit,
+	let result = apiClient.helix.clips.getClipsForGamePaginated(gameId, {
 		startDate,
 	});
 
-	clips.data.sort((a, b) => b.views - a.views);
-
 	let p: Promise<void>[] = [];
-	for (let i = 0; i < clips.data.length; i++) {
-		const clip = clips.data[i];
-		if (clip.language.match(/en/)) p.push(fetchClip(videosDir, clip, i.toString()));
-	}
+	let i = 0;
+	for await (const clip of result) {
+		// TODO: add specific clip limits per language
+		// TODO: add a progress bar by videos fetched?
+		if (clip.language.match(/en/)) {
+			p.push(fetchClip(videosDir, clip, i.toString()));
+			i++;
+		}
 
-	console.log(p.length);
+		// Caso chegamos no numero de clips desejado ou passamos do limite, saimos do loop
+		if (i >= limit || i >= MAX_VIDEOS) break;
+	}
 
 	await Promise.all(p);
 }
