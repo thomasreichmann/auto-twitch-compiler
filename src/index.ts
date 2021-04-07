@@ -2,31 +2,48 @@ if (!process.env.production) {
 	require('dotenv').config();
 }
 
-import * as fs from 'fs';
-import { concat } from './concat';
-import { fetchVideos } from './fetchVideos';
-import { LanguageLimit } from './interfaces/LanguageLimit';
+import express from 'express';
+import Channel from './interfaces/Channel.interface';
+import * as Firebase from './firebase/firebase';
 
-const videosDir = __dirname + '\\videos\\';
+const app = express();
+const port = 3000;
 
-// Lista contendo nome dos canais que os clipes nao devem ser incluidos
-const blackListedChannels: string[] = [];
+// Fetch all channels from firestore and store them in memory
+let channels: Channel[] = [];
+Firebase.getChannels().then(x => (channels = x));
 
-// Uma data representando qual o limite de tempo para buscar clipes
-const maxVideoAge = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
-const langs: LanguageLimit[] = [
-	{ code: 'en', limit: 5 },
-	{ code: 'pt', limit: 5 },
-];
+app.listen(port, () => {
+	console.log(`App listening at http://localhost:${port}`);
+});
 
-(async () => {
-	try {
-		fs.rmdirSync(videosDir, { recursive: true });
-		fs.mkdirSync(videosDir);
+async function setChannelUploadTimeouts() {}
 
-		await fetchVideos(videosDir, '21779', langs, maxVideoAge, blackListedChannels);
-		await concat(videosDir);
-	} catch (err) {
-		console.error(err);
-	}
-})();
+// import * as fs from 'fs';
+// import { concat } from './concat';
+// import { fetchVideos } from './fetchVideos';
+// import { LanguageLimit } from './interfaces/LanguageLimit';
+
+// const videosDir = __dirname + '\\videos\\';
+
+// // Lista contendo nome dos canais que os clipes nao devem ser incluidos
+// const blackListedChannels: string[] = [];
+
+// // Uma data representando qual o limite de tempo para buscar clipes
+// const maxVideoAge = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
+// const langs: LanguageLimit[] = [
+// 	{ code: 'en', limit: 10 },
+// 	{ code: 'pt', limit: 5 },
+// ];
+
+// (async () => {
+// 	try {
+// 		fs.rmdirSync(videosDir, { recursive: true });
+// 		fs.mkdirSync(videosDir);
+
+// 		await fetchVideos(videosDir, '21779', langs, maxVideoAge, blackListedChannels);
+// 		await concat(videosDir);
+// 	} catch (err) {
+// 		console.error(err);
+// 	}
+// })();

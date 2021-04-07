@@ -1,12 +1,13 @@
 import * as fs from 'fs';
 let fetch = require('node-fetch');
 import { ApiClient, HelixClip } from 'twitch';
-import { ClientCredentialsAuthProvider } from 'twitch-auth';
+import { ClientCredentialsAuthProvider, AuthProvider } from 'twitch-auth';
 import { LanguageLimit } from './interfaces/LanguageLimit';
 
 const clientId = process.env.CLIENT_ID!;
 const clientSecret = process.env.CLIENT_SECRET!;
 const authProvider = new ClientCredentialsAuthProvider(clientId, clientSecret);
+
 const apiClient = new ApiClient({ authProvider });
 
 // Consts
@@ -20,7 +21,13 @@ const MAX_VIDEOS = 500;
  * @param limit limite de clipes para serem procurados
  * @param startDate data mais antiga para buscar clips em formato ISO
  */
-export async function fetchVideos(videosDir: string, gameId: string, languageLimits: LanguageLimit[], startDate: string, blackListedChannels: string[]) {
+export async function fetchVideos(
+	videosDir: string,
+	gameId: string,
+	languageLimits: LanguageLimit[],
+	startDate: string,
+	blackListedChannels: string[]
+) {
 	let result = apiClient.helix.clips.getClipsForGamePaginated(gameId, {
 		startDate,
 	});

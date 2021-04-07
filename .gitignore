@@ -2,6 +2,10 @@
 /src/videos/
 *.mp4
 
+# firebase
+/src/firebase/auth.json
+/src/firebase/*.json
+
 # Logs
 logs
 *.log
