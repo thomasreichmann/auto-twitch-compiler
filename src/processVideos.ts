@@ -1,6 +1,7 @@
 import Channel from './interfaces/Channel.interface';
+import { TaskPayload } from './setUploadTimeouts';
 
-async function processVideos(channel: Channel) {
+async function processVideos(data: TaskPayload) {
 	// import * as fs from 'fs';
 	// import { concat } from './concat';
 	// import { fetchVideos } from './fetchVideos';
