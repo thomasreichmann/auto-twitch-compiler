@@ -1,4 +1,6 @@
-import { exec } from 'child_process';
+import child from 'child_process';
+import util from 'util';
+const exec = util.promisify(child.exec);
 
 import { normalize } from './normalize';
 import { verify } from './verify';
@@ -11,8 +13,9 @@ const fs = promises;
 /**
  * Concatena todos os videos no diretorio /videos/
  * @param videosDir caminho absoluto para o diretorio para armazenar videos
+ * @returns caminho absoluto para o arquivo final do video
  */
-export async function concat(videosDir: string): Promise<void> {
+export async function concat(videosDir: string): Promise<string> {
 	let names = await fs.readdir(videosDir);
 	names = names.filter(s => s.endsWith(`.mp4`));
 	// TODO: change this behabiour, if clipID contains out naturaly, it will be ignored
@@ -31,7 +34,7 @@ export async function concat(videosDir: string): Promise<void> {
 	try {
 		await Promise.all(p);
 	} catch (err) {
-		return console.error(err);
+		throw new Error(err);
 	}
 
 	// Criamos o arquivo files.txt para o ffmpeg usar como referencia
@@ -44,21 +47,18 @@ export async function concat(videosDir: string): Promise<void> {
 
 	let filer = ' -b:a 128K';
 
-	const cmd = '"' + ffmpegPath + '" -y' + ' -f concat' + ' -safe 0' + ' -i "' + filesPath + '"' + filer + ' -c copy "' + outFile + '"';
+	const cmd =
+		'"' + ffmpegPath + '" -y' + ' -f concat' + ' -safe 0' + ' -i "' + filesPath + '"' + filer + ' -c copy "' + outFile + '"';
 
-	exec(cmd, { maxBuffer: 1024 * 5000 }, async (err, stdout, stderr) => {
-		if (err) {
-			console.error(`exec error: ${err}`);
-			return;
-		}
+	const { stdout, stderr } = await exec(cmd);
+	// Deletamos todos os arquivos individuais
+	await fs.unlink(filesPath);
 
-		// Deletamos todos os arquivos individuais
-		await fs.unlink(filesPath);
+	p = [];
+	for (let file of files) p.push(fs.unlink(file));
+	await Promise.all(p);
 
-		let p: Promise<void>[] = [];
-		for (let file of files) p.push(fs.unlink(file));
-		await Promise.all(p);
+	console.log(`process complete: ${outFile}`);
 
-		console.log(`process complete: ${outFile}`);
-	});
+	return outFile;
 }

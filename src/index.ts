@@ -25,7 +25,9 @@ const langs: LanguageLimit[] = [
 		fs.mkdirSync(videosDir);
 
 		await fetchVideos(videosDir, '21779', langs, maxVideoAge, blackListedChannels);
-		await concat(videosDir);
+		let outFile = await concat(videosDir);
+
+		console.log(`outfile is ${outFile}`);
 	} catch (err) {
 		console.error(err);
 	}
