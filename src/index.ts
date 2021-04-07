@@ -5,45 +5,38 @@ if (!process.env.production) {
 import express from 'express';
 import Channel from './interfaces/Channel.interface';
 import * as Firebase from './firebase/firebase';
+import setUploadTimeouts from './setUploadTimeouts';
+import processVideos from './processVideos';
+import { ScheduledTask } from 'node-cron';
 
 const app = express();
 const port = 3000;
 
-// Fetch all channels from firestore and store them in memory
 let channels: Channel[] = [];
-Firebase.getChannels().then(x => (channels = x));
+let tasks: ScheduledTask[] = [];
+// Call refreshChannels to initialize the arrays
+refreshChannels();
+
+// Endpoit for refreshing internal channels
+app.get('/refresh', async (req, res) => {
+	await refreshChannels();
+	res.send(`${channels.length}`);
+});
 
 app.listen(port, () => {
 	console.log(`App listening at http://localhost:${port}`);
 });
 
-async function setChannelUploadTimeouts() {}
+/**
+ * Fetches channels from firestore and resets current scheduled tasks with new channels
+ */
+async function refreshChannels() {
+	// Destroy all current tasks
+	for (const task of tasks) task.destroy();
 
-// import * as fs from 'fs';
-// import { concat } from './concat';
-// import { fetchVideos } from './fetchVideos';
-// import { LanguageLimit } from './interfaces/LanguageLimit';
+	// Fetch all channels from firestore and store them in memory
+	channels = await Firebase.getChannels();
 
-// const videosDir = __dirname + '\\videos\\';
-
-// // Lista contendo nome dos canais que os clipes nao devem ser incluidos
-// const blackListedChannels: string[] = [];
-
-// // Uma data representando qual o limite de tempo para buscar clipes
-// const maxVideoAge = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
-// const langs: LanguageLimit[] = [
-// 	{ code: 'en', limit: 10 },
-// 	{ code: 'pt', limit: 5 },
-// ];
-
-// (async () => {
-// 	try {
-// 		fs.rmdirSync(videosDir, { recursive: true });
-// 		fs.mkdirSync(videosDir);
-
-// 		await fetchVideos(videosDir, '21779', langs, maxVideoAge, blackListedChannels);
-// 		await concat(videosDir);
-// 	} catch (err) {
-// 		console.error(err);
-// 	}
-// })();
+	// Create and store all tasks for each channel's uploadTimes
+	tasks = setUploadTimeouts(channels, processVideos);
+}
