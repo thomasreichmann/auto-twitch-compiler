@@ -7,6 +7,7 @@ import fs from 'fs';
 import util from 'util';
 
 const mkdir = util.promisify(fs.mkdir);
+const rmdir = util.promisify(fs.rmdir);
 
 async function processVideos(data: TaskPayload) {
 	let { channel, uploadTime } = data;
@@ -19,35 +20,15 @@ async function processVideos(data: TaskPayload) {
 	let maxVideoAge = new Date(Date.now() - toMs(timeDiff === '00:00' ? '24:00' : timeDiff));
 
 	let videoFolder = __dirname + `\\${channel.id}\\`;
+	// attempt to delete folder in case it is already there
+	try {
+		rmdir(videoFolder, { recursive: true });
+	} catch {}
+
 	await mkdir(videoFolder);
 
-	await fetchVideos(videoFolder, channel.gameId, channel.languages, maxVideoAge.toISOString(), []);
+	let description = await fetchVideos(videoFolder, channel.gameId, channel.languages, maxVideoAge.toISOString(), []);
 	let outFile = await concat(videoFolder);
-	// Assumindo que uploadTimes esta em ordem crescente
-
-	// import * as fs from 'fs';
-	// import { concat } from './concat';
-	// import { fetchVideos } from './fetchVideos';
-	// import { LanguageLimit } from './interfaces/LanguageLimit';
-	// const videosDir = __dirname + '\\videos\\';
-	// // Lista contendo nome dos canais que os clipes nao devem ser incluidos
-	// const blackListedChannels: string[] = [];
-	// // Uma data representando qual o limite de tempo para buscar clipes
-	// const maxVideoAge = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
-	// const langs: LanguageLimit[] = [
-	// 	{ code: 'en', limit: 10 },
-	// 	{ code: 'pt', limit: 5 },
-	// ];
-	// (async () => {
-	// 	try {
-	// 		fs.rmdirSync(videosDir, { recursive: true });
-	// 		fs.mkdirSync(videosDir);
-	// 		await fetchVideos(videosDir, '21779', langs, maxVideoAge, blackListedChannels);
-	// 		await concat(videosDir);
-	// 	} catch (err) {
-	// 		console.error(err);
-	// 	}
-	// })();
 }
 
 /**

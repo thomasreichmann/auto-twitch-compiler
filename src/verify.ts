@@ -58,3 +58,15 @@ async function getVideoTimeBase(file: string): Promise<number> {
 
 	return eval(stdout);
 }
+
+/**
+ * @param file caminho absoluto para o arquivo
+ * @returns Duracao do video em segundos com decimal
+ */
+export async function getVideoDuration(file: string): Promise<number> {
+	// -show_entries format=duration -v quiet -of csv="p=0"
+	const cmd = `ffprobe -v error -show_entries format=duration -v quiet -of csv="p=0" ${file}`;
+	const { stdout, stderr } = await awaitExec(cmd);
+
+	return parseFloat(stdout);
+}
