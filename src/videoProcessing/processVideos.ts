@@ -5,6 +5,7 @@ import { TaskPayload } from '../setUploadTimeouts';
 
 import fs from 'fs';
 import util from 'util';
+import { uploadVideo } from './utils/upload';
 
 const mkdir = util.promisify(fs.mkdir);
 const rmdir = util.promisify(fs.rmdir);
@@ -28,6 +29,7 @@ async function processVideos(data: TaskPayload) {
 	await mkdir(videoFolder);
 
 	let description = await fetchVideos(videoFolder, channel.gameId, channel.languages, maxVideoAge.toISOString(), []);
+
 	let outFile = await concat(videoFolder);
 }
 

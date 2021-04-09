@@ -7,6 +7,10 @@ const MAX_AUDIO_BITRATE = 135000;
 const MIN_AUDIO_BITRATE = 120000;
 const CORRECT_SAMPLE_RATE = 48000;
 
+// TODO: this applies to all instances of ffmpeg usage
+// i should look into importing ffmpeg in a way that doesn't require it to be installed on the machine
+// so that only a npm i is enougth to run the project
+
 /**
  * Funcao retorna true caso o arquivo precise ser padronizado
  * @param file caminho absoluto do arquivo

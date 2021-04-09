@@ -17,6 +17,8 @@ let tasks: ScheduledTask[] = [];
 // Call refreshChannels to initialize the arrays
 refreshChannels();
 
+// TODO: create a firebase function that calls this enpoint when the table updates
+
 // Endpoit for refreshing internal channels
 app.get('/refresh', async (req, res) => {
 	await refreshChannels();
