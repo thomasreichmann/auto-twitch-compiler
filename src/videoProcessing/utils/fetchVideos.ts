@@ -2,13 +2,13 @@ import * as fs from 'fs';
 let fetch = require('node-fetch');
 import { ApiClient, HelixClip } from 'twitch';
 import { ClientCredentialsAuthProvider, AuthProvider } from 'twitch-auth';
-import { Language } from './interfaces/Channel.interface';
-import { LanguageLimit } from './interfaces/LanguageLimit';
+import { Language } from '../../interfaces/Channel.interface';
+import { LanguageLimit } from '../../interfaces/LanguageLimit';
 
 import child from 'child_process';
 import util from 'util';
 import { getVideoDuration } from './verify';
-import { toHM } from './videoProcessing/processVideos';
+import { toHM } from '../processVideos';
 const exec = util.promisify(child.exec);
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 

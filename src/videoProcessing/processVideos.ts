@@ -1,5 +1,5 @@
-import { concat } from '../concat';
-import { fetchVideos } from '../fetchVideos';
+import { concat } from './utils/concat';
+import { fetchVideos } from './utils/fetchVideos';
 import Channel from '../interfaces/Channel.interface';
 import { TaskPayload } from '../setUploadTimeouts';
 
