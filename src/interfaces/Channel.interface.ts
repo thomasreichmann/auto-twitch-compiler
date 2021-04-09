@@ -1,5 +1,5 @@
 interface IObjectKeys {
-	[key: string]: string | number | Language[] | string[];
+	[key: string]: string | number | Language[] | string[] | undefined;
 }
 
 interface Channel extends IObjectKeys {
@@ -16,6 +16,8 @@ interface Channel extends IObjectKeys {
 export interface Language extends IObjectKeys {
 	code: string;
 	ammount: number;
+
+	count?: number;
 }
 
 export default Channel;

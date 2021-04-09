@@ -58,7 +58,5 @@ export async function concat(videosDir: string): Promise<string> {
 	for (let file of files) p.push(fs.unlink(file));
 	await Promise.all(p);
 
-	console.log(`process complete: ${outFile}`);
-
 	return outFile;
 }

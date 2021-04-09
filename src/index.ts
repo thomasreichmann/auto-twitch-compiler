@@ -6,7 +6,7 @@ import express from 'express';
 import Channel from './interfaces/Channel.interface';
 import * as Firebase from './firebase/firebase';
 import setUploadTimeouts from './setUploadTimeouts';
-import processVideos from './processVideos';
+import processVideos from './videoProcessing/processVideos';
 import { ScheduledTask } from 'node-cron';
 
 const app = express();

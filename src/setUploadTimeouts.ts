@@ -2,7 +2,14 @@ import Channel from './interfaces/Channel.interface';
 import cron from 'node-cron';
 
 export interface TaskPayload {
+	/**
+	 * Canal que originou essa task
+	 */
 	channel: Channel;
+
+	/**
+	 * uploadTime da task
+	 */
 	uploadTime: string;
 }
 

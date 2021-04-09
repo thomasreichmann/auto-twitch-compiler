@@ -10,7 +10,7 @@ const clientSecret = process.env.CLIENT_SECRET!;
 const authProvider = new ClientCredentialsAuthProvider(clientId, clientSecret);
 const apiClient = new ApiClient({ authProvider });
 
-const GAME_NAME = 'League of legends';
+const GAME_NAME = 'Diablo II: Resurrected';
 
 (async () => {
 	let game = await apiClient.helix.games.getGameByName(GAME_NAME);

@@ -2,7 +2,12 @@ import * as fs from 'fs';
 let fetch = require('node-fetch');
 import { ApiClient, HelixClip } from 'twitch';
 import { ClientCredentialsAuthProvider, AuthProvider } from 'twitch-auth';
+import { Language } from './interfaces/Channel.interface';
 import { LanguageLimit } from './interfaces/LanguageLimit';
+
+if (!process.env.production) {
+	require('dotenv').config();
+}
 
 const clientId = process.env.CLIENT_ID!;
 const clientSecret = process.env.CLIENT_SECRET!;
@@ -24,13 +29,15 @@ const MAX_VIDEOS = 500;
 export async function fetchVideos(
 	videosDir: string,
 	gameId: string,
-	languageLimits: LanguageLimit[],
+	languageLimits: Language[],
 	startDate: string,
 	blackListedChannels: string[]
 ) {
 	let result = apiClient.helix.clips.getClipsForGamePaginated(gameId, {
 		startDate,
 	});
+
+	languageLimits.sort((a, b) => a.ammount - b.ammount);
 
 	// Inicializamos o count de todas as languages
 	for (const lang of languageLimits) if (!lang.count) lang.count = 0;
@@ -41,13 +48,15 @@ export async function fetchVideos(
 	for await (const clip of result) {
 		// TODO: add a progress bar by videos fetched?
 
+		clip.
+
 		for (const lang of languageLimits) {
 			// Caso o canal do clip esteja na blacklist, pulamos o clip
 			if (blackListedChannels.find(c => c === clip.broadcasterDisplayName)) break;
 
 			// Checamos o clipe contra todas as languages que foram requesitadas
 			// Caso ele seja uma delas, fazemos o download e saimos desse loop
-			if (clip.language.match(lang.code) && lang.count! < lang.limit) {
+			if (clip.language.match(lang.code) && lang.count! < lang.ammount) {
 				p.push(fetchClip(videosDir, clip, (p.length + 1).toString() + `_${clip.language}`));
 				lang.count!++;
 
@@ -56,8 +65,7 @@ export async function fetchVideos(
 		}
 
 		// Completed so sera true depois do loop caso todas as languages tiverem chegado no numero correto
-		let completed = false;
-		for (const lang of languageLimits) completed = lang.count! >= lang.limit;
+		let completed = languageLimits.every(x => x.count! >= x.ammount);
 
 		// Caso chegamos no numero de clips desejado ou passamos do limite, saimos do loop
 		if (completed || i > MAX_VIDEOS) break;
@@ -69,11 +77,11 @@ export async function fetchVideos(
 
 async function fetchClip(videosDir: string, clip: HelixClip, fileName: string) {
 	// DEBUG
-	console.log(clip.creationDate, clip.language, clip.views, clip.title, clip.broadcasterDisplayName, clip.url);
+	// console.log(clip.creationDate, clip.language, clip.views, clip.title, clip.broadcasterDisplayName, clip.url);
 
 	let url = clip.thumbnailUrl.split('-preview-')[0] + '.mp4';
 
-	console.log(url);
+	// console.log(url);
 
 	let response = await fetch(url);
 	let buffer = await response.buffer();
