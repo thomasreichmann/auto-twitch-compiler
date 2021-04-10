@@ -6,6 +6,7 @@ import * as fs from 'fs';
 import { concat } from './concat';
 import { fetchVideos } from './fetchVideos';
 import { LanguageLimit } from './interfaces/LanguageLimit';
+import { normalizeAudio } from './normalizeAudio';
 
 const videosDir = __dirname + '\\videos\\';
 
@@ -14,18 +15,15 @@ const blackListedChannels: string[] = [];
 
 // Uma data representando qual o limite de tempo para buscar clipes
 const maxVideoAge = new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString();
-const langs: LanguageLimit[] = [
-	{ code: 'en', limit: 5 },
-	{ code: 'pt', limit: 5 },
-];
+const langs: LanguageLimit[] = [{ code: 'en', limit: 5 }];
 
 (async () => {
 	try {
 		fs.rmdirSync(videosDir, { recursive: true });
 		fs.mkdirSync(videosDir);
 
-		await fetchVideos(videosDir, '21779', langs, maxVideoAge, blackListedChannels);
-		let outFile = await concat(videosDir);
+		await fetchVideos(videosDir, '1788326126', langs, maxVideoAge, blackListedChannels);
+		let outFile = await normalizeAudio(await concat(videosDir));
 
 		console.log(`outfile is ${outFile}`);
 	} catch (err) {
