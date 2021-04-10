@@ -2,7 +2,7 @@ import * as admin from 'firebase-admin';
 import Channel from '../interfaces/Channel.interface';
 
 admin.initializeApp({
-	credential: admin.credential.cert(`${__dirname}\\auth.json`),
+	credential: admin.credential.cert(`${__dirname}/auth.json`),
 });
 
 const db = admin.firestore();

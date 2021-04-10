@@ -21,7 +21,7 @@ async function processVideos(data: TaskPayload) {
 	console.log(timeDiff, timeDiff === '00:00' ? '24:00' : timeDiff);
 	let maxVideoAge = new Date(Date.now() - toMs(timeDiff === '00:00' ? '24:00' : timeDiff));
 
-	let videoFolder = __dirname + `\\${channel.id}\\`;
+	let videoFolder = __dirname + `/${channel.id}/`;
 	// attempt to delete folder in case it is already there
 	try {
 		await rmdir(videoFolder, { recursive: true });
