@@ -23,14 +23,17 @@ async function processVideos(data: TaskPayload) {
 	let videoFolder = __dirname + `\\${channel.id}\\`;
 	// attempt to delete folder in case it is already there
 	try {
-		rmdir(videoFolder, { recursive: true });
+		await rmdir(videoFolder, { recursive: true });
 	} catch {}
 
 	await mkdir(videoFolder);
 
-	let description = await fetchVideos(videoFolder, channel.gameId, channel.languages, maxVideoAge.toISOString(), []);
-
+	let [title, description, tags] = await fetchVideos(channel, videoFolder, maxVideoAge.toISOString(), []);
 	let outFile = await concat(videoFolder);
+
+	await uploadVideo(channel, outFile, { title, description, tags: tags.split(',') });
+
+	await rmdir(videoFolder, { recursive: true });
 }
 
 /**

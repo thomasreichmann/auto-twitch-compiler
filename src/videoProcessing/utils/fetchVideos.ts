@@ -2,7 +2,7 @@ import * as fs from 'fs';
 let fetch = require('node-fetch');
 import { ApiClient, HelixClip } from 'twitch';
 import { ClientCredentialsAuthProvider, AuthProvider } from 'twitch-auth';
-import { Language } from '../../interfaces/Channel.interface';
+import Channel, { Language } from '../../interfaces/Channel.interface';
 import { LanguageLimit } from '../../interfaces/LanguageLimit';
 
 import child from 'child_process';
@@ -35,20 +35,19 @@ const MAX_VIDEOS = 500;
  * @returns descricao para o video
  */
 export async function fetchVideos(
+	channel: Channel,
 	videosDir: string,
-	gameId: string,
-	languageLimits: Language[],
 	startDate: string,
 	blackListedChannels: string[]
-): Promise<string> {
-	let result = apiClient.helix.clips.getClipsForGamePaginated(gameId, {
+): Promise<string[]> {
+	let result = apiClient.helix.clips.getClipsForGamePaginated(channel.gameId, {
 		startDate,
 	});
 
-	languageLimits.sort((a, b) => a.ammount - b.ammount);
+	channel.languages.sort((a, b) => a.ammount - b.ammount);
 
 	// Inicializamos o count de todas as languages
-	for (const lang of languageLimits) if (!lang.count) lang.count = 0;
+	for (const lang of channel.languages) if (!lang.count) lang.count = 0;
 
 	let p: Promise<FetchReturn>[] = [];
 	// Variavel para contar quantos clipes ja foram considerados
@@ -56,7 +55,7 @@ export async function fetchVideos(
 	for await (const clip of result) {
 		// TODO: add a progress bar by videos fetched?
 
-		for (const lang of languageLimits) {
+		for (const lang of channel.languages) {
 			// Caso o canal do clip esteja na blacklist, pulamos o clip
 			if (blackListedChannels.find(c => c === clip.broadcasterDisplayName)) break;
 
@@ -71,14 +70,54 @@ export async function fetchVideos(
 		}
 
 		// Completed so sera true depois do loop caso todas as languages tiverem chegado no numero correto
-		let completed = languageLimits.every(x => x.count! >= x.ammount);
+		let completed = channel.languages.every(x => x.count! >= x.ammount);
 
 		// Caso chegamos no numero de clips desejado ou passamos do limite, saimos do loop
 		if (completed || i > MAX_VIDEOS) break;
 		i++;
 	}
 
-	return await createDescription(await Promise.all(p));
+	let fetchReturn = await Promise.all(p);
+
+	let description = await createDescription(fetchReturn);
+	let title = createTitle(channel, fetchReturn);
+	let tags = createTags(channel, fetchReturn);
+
+	return [title, description, tags];
+}
+
+function createTags(channel: Channel, data: FetchReturn[]): string {
+	let clips = data.map(x => x.clip);
+	let tags = `${channel.gameName},`;
+
+	for (let clip of clips) {
+		tags += `${clip.broadcasterDisplayName},`;
+	}
+
+	return tags;
+}
+
+function createTitle(channel: Channel, data: FetchReturn[]): string {
+	let clips = data.map(x => x.clip);
+	let title = channel.titleTemplate;
+
+	// Replace any template ({0}) in the title with the apropriate values
+
+	// Adds (streamer1, streamer2, streamer3, streamer4)
+	let broadcasters = '(';
+	let i = 0;
+	for (let clip of clips) {
+		broadcasters += `${clip.broadcasterDisplayName}`;
+		if (i > 4) {
+			broadcasters += ')';
+			break;
+		} else broadcasters += ', ';
+		i++;
+	}
+	broadcasters += ')';
+	title = title.replace('{0}', broadcasters);
+
+	return title;
 }
 
 async function createDescription(data: FetchReturn[]): Promise<string> {
@@ -86,7 +125,7 @@ async function createDescription(data: FetchReturn[]): Promise<string> {
 
 	// Add all of the credit links
 	for (let part of data) {
-		description += `${part.clip.broadcasterDisplayName}: https://www.twitch.tv/${part.clip.broadcasterDisplayName}`;
+		description += `${part.clip.broadcasterDisplayName}: https://www.twitch.tv/${part.clip.broadcasterDisplayName}\n`;
 	}
 
 	description += '\n';
@@ -94,8 +133,8 @@ async function createDescription(data: FetchReturn[]): Promise<string> {
 	// Adds all of the timestamps to the video
 	let currTime = 0;
 	for (let part of data) {
-		let duration = (await getVideoDuration(part.fileName)) * 1000;
-		description += `${toHM(currTime)} ${part.clip.broadcasterDisplayName}`;
+		let duration = Math.floor((await getVideoDuration(part.filePath)) * 1000);
+		description += `${toHM(currTime)} ${part.clip.broadcasterDisplayName}\n`;
 
 		currTime += duration;
 	}
@@ -104,7 +143,7 @@ async function createDescription(data: FetchReturn[]): Promise<string> {
 }
 
 interface FetchReturn {
-	fileName: string;
+	filePath: string;
 	clip: HelixClip;
 }
 
@@ -119,10 +158,12 @@ async function fetchClip(videosDir: string, clip: HelixClip, fileName: string): 
 	let response = await fetch(url);
 	let buffer = await response.buffer();
 
-	fs.writeFileSync(videosDir + fileName + '.mp4', buffer);
+	let filePath = videosDir + fileName + '.mp4';
+
+	fs.writeFileSync(filePath, buffer);
 
 	return {
-		fileName,
+		filePath,
 		clip,
 	};
 }

@@ -42,21 +42,3 @@ test('timeDiff returns correct time', () => {
 	let expected = '04:14';
 	expect(getTimeDiff(t1, t2)).toEqual(expected);
 });
-
-test('process video', async () => {
-	let channel: Channel = {
-		gameId: '21779',
-		gameName: 'League of Legends',
-		id: '123abc123',
-		languages: [
-			{ code: 'en', ammount: 10 },
-			{ code: 'pt', ammount: 2 },
-		],
-		name: 'League channel 1',
-		titleTemplate: '{1} ayy {0}',
-		uploadTimes: ['12:00'],
-		youtubeApiKey: 'asd123asd123as1d23',
-	};
-
-	await processVideos({ channel, uploadTime: channel.uploadTimes[0] });
-});

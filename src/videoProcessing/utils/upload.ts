@@ -25,10 +25,11 @@ export async function uploadVideo(channel: Channel, filePath: string, info: Vide
 	});
 
 	let youtube = google.youtube({ version: 'v3', auth: oAuthClient });
-
+	// Diablo II Resurected Recap | (MrLlamaSC, Quin69, Asmongold, Zizaran, alanzoka, EsfandTV, MrLlamaSC, Quin69, EsfandTV, BTNeandertha1, dbrunski125, MrLlamaSC, LIRIK, MrLlamaSC, nl_Kripp, )
 	try {
 		await youtube.videos.insert({
 			part: ['snippet', 'status'],
+
 			requestBody: {
 				snippet: {
 					...info,
