@@ -69,7 +69,7 @@ async function getVideoTimeBase(file: string): Promise<number> {
  */
 export async function getVideoDuration(file: string): Promise<number> {
 	// -show_entries format=duration -v quiet -of csv="p=0"
-	const cmd = `ffprobe -v error -show_entries format=duration -v quiet -of csv="p=0" ${file}`;
+	const cmd = `ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 ${file}`;
 
 	const { stdout, stderr } = await awaitExec(cmd);
 	if (stderr) console.log(stderr);

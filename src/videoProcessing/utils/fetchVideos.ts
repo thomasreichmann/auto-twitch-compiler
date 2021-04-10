@@ -8,7 +8,7 @@ import { LanguageLimit } from '../../interfaces/LanguageLimit';
 import child from 'child_process';
 import util from 'util';
 import { getVideoDuration } from './verify';
-import { toHM } from '../processVideos';
+import { padNumber } from '../processVideos';
 const exec = util.promisify(child.exec);
 const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 
@@ -134,12 +134,25 @@ async function createDescription(data: FetchReturn[]): Promise<string> {
 	let currTime = 0;
 	for (let part of data) {
 		let duration = Math.floor((await getVideoDuration(part.filePath)) * 1000);
-		description += `${toHM(currTime)} ${part.clip.broadcasterDisplayName}\n`;
+		description += `${toMS(currTime)} ${part.clip.broadcasterDisplayName}\n`;
 
 		currTime += duration;
 	}
 
 	return description;
+}
+
+/**
+ * @param ms time in ms
+ * @returns time in format MM:SS
+ */
+export function toMS(ms: number) {
+	let seconds = ms / 1000;
+	let hours = seconds / 3600;
+	seconds = seconds % 3600;
+	let minutes = seconds / 60;
+	seconds = seconds % 60;
+	return `${padNumber(Math.floor(minutes))}:${padNumber(Math.floor(seconds))}`;
 }
 
 interface FetchReturn {

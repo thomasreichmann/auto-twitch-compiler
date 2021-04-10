@@ -32,7 +32,9 @@ async function processVideos(data: TaskPayload) {
 	let [title, description, tags] = await fetchVideos(channel, videoFolder, maxVideoAge.toISOString(), []);
 	let outFile = await normalizeAudio(await concat(videoFolder));
 
-	await uploadVideo(channel, outFile, { title, description, tags: tags.split(',') });
+	console.log(title, description, tags);
+
+	// await uploadVideo(channel, outFile, { title, description, tags: tags.split(',') });
 
 	await rmdir(videoFolder, { recursive: true });
 }

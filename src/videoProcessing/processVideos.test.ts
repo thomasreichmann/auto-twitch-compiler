@@ -1,5 +1,6 @@
 import Channel from '../interfaces/Channel.interface';
 import processVideos, { toMs, getPreviousIndex, toHM, getTimeDiff } from './processVideos';
+import { toMS } from './utils/fetchVideos';
 
 describe('Previous index util', () => {
 	test('returns index - 1', () => {
@@ -32,6 +33,14 @@ describe('HH:MM conversion', () => {
 		let expected = '13:37';
 		let time = 49020000;
 		expect(toHM(time)).toEqual(expected);
+	});
+});
+
+describe('MM:SS conversion', () => {
+	test('returns expected MM:SS value', () => {
+		let expected = '00:15';
+		let time = 15118;
+		expect(toMS(time)).toEqual(expected);
 	});
 });
 
