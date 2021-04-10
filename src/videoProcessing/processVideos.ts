@@ -6,6 +6,7 @@ import { TaskPayload } from '../setUploadTimeouts';
 import fs from 'fs';
 import util from 'util';
 import { uploadVideo } from './utils/upload';
+import { normalizeAudio } from './utils/normalizeAudio';
 
 const mkdir = util.promisify(fs.mkdir);
 const rmdir = util.promisify(fs.rmdir);
@@ -29,7 +30,7 @@ async function processVideos(data: TaskPayload) {
 	await mkdir(videoFolder);
 
 	let [title, description, tags] = await fetchVideos(channel, videoFolder, maxVideoAge.toISOString(), []);
-	let outFile = await concat(videoFolder);
+	let outFile = await normalizeAudio(await concat(videoFolder));
 
 	await uploadVideo(channel, outFile, { title, description, tags: tags.split(',') });
 
