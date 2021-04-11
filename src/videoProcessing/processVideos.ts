@@ -27,14 +27,18 @@ async function processVideos(data: TaskPayload) {
 		await rmdir(videoFolder, { recursive: true });
 	} catch {}
 
+	console.log(`Creating video folder: ${videoFolder}`);
 	await mkdir(videoFolder);
 
+	console.log(`Fetching videos for ${channel.name}`);
 	let [title, description, tags] = await fetchVideos(channel, videoFolder, maxVideoAge.toISOString(), []);
+
+	console.log(`Concat and normalizeAudio for ${channel.name}`);
 	let outFile = await normalizeAudio(await concat(videoFolder));
 
-	console.log(title, description, tags);
+	console.log(`Uploading Video with info:\n`, title, description, tags);
 
-	// await uploadVideo(channel, outFile, { title, description, tags: tags.split(',') });
+	await uploadVideo(channel, outFile, { title, description, tags: tags.split(',') });
 
 	await rmdir(videoFolder, { recursive: true });
 }
