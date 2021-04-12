@@ -107,14 +107,17 @@ function createTitle(channel: Channel, data: FetchReturn[]): string {
 	let broadcasters = '(';
 	let i = 0;
 	for (let clip of clips) {
-		broadcasters += `${clip.broadcasterDisplayName}`;
+		// This prevents a streamer's name appearing twice in the title
+		if (!broadcasters.match(clip.broadcasterDisplayName)) {
+			broadcasters += `${clip.broadcasterDisplayName}`;
+			i++;
+		}
+
 		if (i > 4) {
 			broadcasters += ')';
 			break;
 		} else broadcasters += ', ';
-		i++;
 	}
-	broadcasters += ')';
 	title = title.replace('{0}', broadcasters);
 
 	return title;
@@ -125,7 +128,8 @@ async function createDescription(data: FetchReturn[]): Promise<string> {
 
 	// Add all of the credit links
 	for (let part of data) {
-		description += `${part.clip.broadcasterDisplayName}: https://www.twitch.tv/${part.clip.broadcasterDisplayName}\n`;
+		if (!description.match(part.clip.broadcasterDisplayName))
+			description += `${part.clip.broadcasterDisplayName}: https://www.twitch.tv/${part.clip.broadcasterDisplayName}\n`;
 	}
 
 	description += '\n';
