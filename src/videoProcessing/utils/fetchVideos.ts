@@ -111,16 +111,17 @@ function createTitle(channel: Channel, data: FetchReturn[]): string {
 		if (!broadcasters.match(clip.broadcasterDisplayName)) {
 			broadcasters += `${clip.broadcasterDisplayName}`;
 			i++;
-		}
 
-		if (i > 4) {
-			broadcasters += ')';
-			break;
-		} else broadcasters += ', ';
+			if (i > 4) {
+				broadcasters += ')';
+				break;
+			} else broadcasters += ', ';
+		}
 	}
 	title = title.replace('{0}', broadcasters);
 
-	return title;
+	// This prevents title from being over the youtube title length limit
+	return trimString(title, 98);
 }
 
 async function createDescription(data: FetchReturn[]): Promise<string> {
@@ -157,6 +158,10 @@ export function toMS(ms: number) {
 	let minutes = seconds / 60;
 	seconds = seconds % 60;
 	return `${padNumber(Math.floor(minutes))}:${padNumber(Math.floor(seconds))}`;
+}
+
+function trimString(s: string, len: number) {
+	return s.substring(0, Math.min(s.length, len));
 }
 
 interface FetchReturn {
